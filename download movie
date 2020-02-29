@@ -1,0 +1,48 @@
+import os
+import requests       #导入requests包
+from bs4 import  BeautifulSoup
+import chunk
+
+headers = {
+
+    "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+}
+url='https://bili.meijuzuida.com/20200102/22144_aff69038/1000k/hls/'
+os.chdir('H:\work\pycharm\python_exercise\download')
+f=open('index.m3u8','r')#打开文件
+url_list=[]
+for i in f:
+    if i.startswith('d356'):
+        n_url=url+i#根据文件里的每个信息，拼接成一个新的url
+        url_list.append(n_url)#根据文件里的每个信息，拼接成一个新的url，新的url加入这个列表
+    else:
+        pass
+f.close()
+
+
+def downloader(all_url,download_path):
+    for i in range(len(all_url)):#多少个url就进行多少次循环
+        url_now=all_url[i].replace('\n','')#本次循环取出的url地址
+        filename=url_now.split('/')[-1]#文件名取url以 / 分割的最后字符串
+
+        try:
+            response=requests.get(url_now,stream=True,verify=False)
+        except Exception as e:
+            pass
+        file_path = os.path.join(download_path,filename)#每个文件的绝对路径
+        os.chdir(download_path)#改变路径
+        with open(file_path,'wb+')as file:#以二进制写入形式打开文件(通过绝对文件绝对路径打开)
+            for chunk in response.iter_content(chunk_size=1024):
+                if chunk:
+                    file.write(chunk)
+
+    file.close()
+
+if __name__ == '__main__':
+    downloader(url_list,'H:\work\pycharm\python_exercise\download')
+
+#合并ts文件方法：
+#打开cmd ,执行：copy /b  F:\文件路径文件夹\*.ts    F:\文件路径文件夹\new.ts”，这样就把所有原来的ts文件合成一个new文件了
+
+
+
